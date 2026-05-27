@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Access Portal | Validation Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==========================================================================
+           1. DESIGN SYSTEM TOKENS (NEXUS COMPLIANT)
+           ========================================================================== */
+        :root {
+            --bg-global: #ffffff;
+            --bg-canvas: #f8fafc;
+            --text-main: #111111;
+            --text-muted: #555555;
+            --accent-royal: #1e40af;
+            --accent-hover: #1d4ed8;
+            --border-subtle: #e2e8f0;
+            --system-error: #ef4444;
+            --system-success: #10b981;
+            --font-sans: 'Inter', sans-serif;
+            --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ==========================================================================
+           2. STRUCTURE & RESET
+           ========================================================================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .form-card {
+            background-color: var(--bg-global);
+            border: 1px solid var(--border-subtle);
+            padding: 2.5rem 2rem;
+            border-radius: 8px;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.02);
+        }
+
+        .form-header {
+            margin-bottom: 2rem;
+        }
+
+        .form-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* ==========================================================================
+           3. FORM INPUT ARCHITECTURE
+           ========================================================================== */
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+            font-family: var(--font-sans);
+            color: var(--text-main);
+            background-color: var(--bg-global);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        /* Input Focus Border State */
+        .input-group input:focus {
+            border-color: var(--text-main);
+            box-shadow: 0 0 0 1px var(--text-main);
+        }
+        
+        /* Dynamic Error Visual Overrides */
+        .input-group.field-error input {
+            border-color: var(--system-error);
+            background-color: #fef2f2;
+        }
+
+        .input-group.field-error input:focus {
+            box-shadow: 0 0 0 1px var(--system-error);
+        }
+        
+        /* Inline Error Labels managed via JS */
+        .error-label {
+            color: var(--system-error);
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 0.4rem;
+            display: none;
+        }
+
+        .input-group.field-error .error-label {
+            display: block;
+        }
+
+        /* Form Submission Controls */
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--accent-royal);
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            margin-top: 0.5rem;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* Real-Time Success Indicator Banner */
+        .alert-success {
+            display: none;
+            background-color: #ecfdf5;
+            border: 1px solid var(--system-success);
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-card">
+        <div id="successBanner" class="alert-success" role="alert">
+            🛡️ Identity Authenticated & Registered!
+        </div>
+        
+        <div class="form-header">
+            <h2>NEXUS Access</h2>
+            <p>Initialize your gateway credentials. All parameters are verified in real time.</p>
+        </div>
+
+        <form id="validationForm" novalidate>
+            <div class="input-group" id="group-name">
+                <label for="userName">Full Name</label>
+                <input type="text" id="userName" autocomplete="name" placeholder="Alex Mercer">
+                <div class="error-label">Identity entry field cannot be left blank.</div>
+            </div>
+
+            <div class="input-group" id="group-email">
+                <label for="userEmail">Email Address</label>
+                <input type="email" id="userEmail" autocomplete="email" placeholder="alex@nexus.io">
+                <div class="error-label">Provide a syntactically valid email format.</div>
+            </div>
+
+            <div class="input-group" id="group-phone">
+                <label for="userPhone">Phone Number</label>
+                <input type="tel" id="userPhone" autocomplete="tel" placeholder="1234567890">
+                <div class="error-label">Enter a clean numeric sequence consisting of exactly 10 digits.</div>
+            </div>
+
+            <div class="input-group" id="group-password">
+                <label for="userPassword">Password</label>
+                <input type="password" id="userPassword" autocomplete="new-password" placeholder="••••••••">
+                <div class="error-label">Password requires a minimal length of 8 metrics.</div>
+            </div>
+
+            <button type="submit" class="btn-submit">Provision Secure Profile</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('validationForm');
+            const successBanner = document.getElementById('successBanner');
+
+            // Form Fields Mappings & Validation Regular Expressions
+            const validationSchema = {
+                name: {
+                    input: document.getElementById('userName'),
+                    group: document.getElementById('group-name'),
+                    check: val => val.trim().length > 0
+                },
+                email: {
+                    input: document.getElementById('userEmail'),
+                    group: document.getElementById('group-email'),
+                    check: val => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)
+                },
+                phone: {
+                    input: document.getElementById('userPhone'),
+                    group: document.getElementById('group-phone'),
+                    check: val => /^\d{10}$/.test(val.trim())
+                },
+                password: {
+                    input: document.getElementById('userPassword'),
+                    group: document.getElementById('group-password'),
+                    check: val => val.length >= 8
+                }
+            };
+
+            // Dynamic Observers for Blur (leaving input) and Active Input changes
+            Object.keys(validationSchema).forEach(key => {
+                const scheme = validationSchema[key];
+                
+                // Triggers error display immediately upon focus exit
+                scheme.input.addEventListener('blur', () => {
+                    const isValid = scheme.check(scheme.input.value);
+                    if (!isValid) {
+                        scheme.group.classList.add('field-error');
+                    } else {
+                        scheme.group.classList.remove('field-error');
+                    }
+                });
+
+                // Dynamically hides the error text style as soon as user types valid characters
+                scheme.input.addEventListener('input', () => {
+                    if (scheme.group.classList.contains('field-error')) {
+                        if (scheme.check(scheme.input.value)) {
+                            scheme.group.classList.remove('field-error');
+                        }
+                    }
+                });
+            });
+
+            // Prevent Submission Interception and Check Schema Map
+            form.addEventListener('submit', (e) => {
+                e.preventDefault(); 
+                let isFormValid = true;
+
+                Object.keys(validationSchema).forEach(key => {
+                    const scheme = validationSchema[key];
+                    const isValid = scheme.check(scheme.input.value);
+                    if (!isValid) {
+                        scheme.group.classList.add('field-error');
+                        isFormValid = false;
+                    } else {
+                        scheme.group.classList.remove('field-error');
+                    }
+                });
+
+                // Process Success State Actions
+                if (isFormValid) {
+                    successBanner.style.display = 'block';
+                    form.reset(); 
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                    setTimeout(() => {
+                        successBanner.style.display = 'none';
+                    }, 5000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
